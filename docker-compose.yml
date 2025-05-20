@@ -1,0 +1,17 @@
+services:
+  nextjs:
+    build: ./nextjs
+    container_name: nextjs
+    ports:
+      - "3000:3000"
+    restart: always
+
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./ssl:/etc/nginx/ssl:ro
+    restart: always
