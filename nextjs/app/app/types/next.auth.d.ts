@@ -1,4 +1,3 @@
-// types/next-auth.d.ts
 import NextAuth, { DefaultSession, DefaultUser } from "next-auth";
 import { JWT as DefaultJWT } from "next-auth/jwt";
 
@@ -7,6 +6,7 @@ declare module "next-auth" {
     roles?: string[];
     preferred_username?: string;
   }
+
   interface Session {
     user: User;
     accessToken?: string;

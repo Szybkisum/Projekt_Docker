@@ -15,11 +15,22 @@ services:
       - KC_HTTP_RELATIVE_PATH=/auth
       - KC_HTTP_ENABLED=true
       - KC_PROXY_HEADERS=xforwarded
+      - KC_HEALTH_ENABLED=true
     command: start-dev
     networks:
       frontend-network:
         ipv4_address: 192.168.1.2
-    restart: always
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "exec 3<>/dev/tcp/127.0.0.1/9000;echo -e \"GET /auth/health/ready HTTP/1.1\r\nHost: localhost:9000\r\nConnection: close\r\n\r\n\" >&3;grep -q \"HTTP/1.1 200 OK\" <&3",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
 
   nextjs:
     build: ./nextjs
@@ -28,7 +39,8 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - keycloak
+      keycloak:
+        condition: service_healthy
     environment:
       - NEXTAUTH_URL=https://localhost
       - NEXTAUTH_SECRET=arGEP4i7L+YMLFTpeKCEajLq1yjhc3IfvJrsP/BPZhA=
@@ -42,10 +54,11 @@ services:
     healthcheck:
       test:
         ["CMD", "node", "-e", "require('http').get('http://localhost:3000')"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
       retries: 5
-    restart: always
+      start_period: 30s
+    restart: unless-stopped
 
   nginx:
     build: ./nginx
@@ -57,6 +70,8 @@ services:
     depends_on:
       nextjs:
         condition: service_healthy
+      keycloak:
+        condition: service_healthy
     volumes:
       - ./nginx/ssl:/etc/nginx/ssl:ro
     networks:
@@ -67,7 +82,8 @@ services:
       interval: 30s
       timeout: 5s
       retries: 5
-    restart: always
+      start_period: 30s
+    restart: unless-stopped
 
 volumes:
   keycloak-data:

@@ -1,5 +1,5 @@
 import KeycloakProvider from "next-auth/providers/keycloak";
-import { NextAuthOptions, Account } from "next-auth";
+import { NextAuthOptions, Account, Session } from "next-auth";
 import { JWT } from "next-auth/jwt";
 
 const keycloakPublicIssuer = process.env.KEYCLOAK_ISSUER;
@@ -43,27 +43,19 @@ export const authOptions: NextAuthOptions = {
             Buffer.from(account.access_token.split(".")[1], "base64").toString()
           );
 
-          let roles: string[] = [];
-          if (decodedAccessToken.realm_access?.roles) {
-            roles = roles.concat(decodedAccessToken.realm_access.roles);
-          }
-
           const clientId = process.env.KEYCLOAK_CLIENT_ID;
           if (
             clientId &&
             decodedAccessToken.resource_access?.[clientId]?.roles
           ) {
-            roles = roles.concat(
-              decodedAccessToken.resource_access[clientId].roles
-            );
+            token.roles = decodedAccessToken.resource_access[clientId].roles;
           }
-
-          token.roles = [...new Set(roles)];
         } catch (e) {
           console.error(
             "Error decoding access token or extracting roles in JWT callback",
             e
           );
+          token.roles = [];
         }
       }
       return token;
@@ -72,9 +64,9 @@ export const authOptions: NextAuthOptions = {
       session,
       token,
     }: {
-      session: any;
+      session: Session;
       token: JWT;
-    }): Promise<any> {
+    }): Promise<Session> {
       if (token.accessToken) {
         session.accessToken = token.accessToken as string;
       }
