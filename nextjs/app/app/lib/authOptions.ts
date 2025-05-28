@@ -1,27 +1,34 @@
 import KeycloakProvider from "next-auth/providers/keycloak";
 import { NextAuthOptions, Account, Session } from "next-auth";
 import { JWT } from "next-auth/jwt";
+import fs from "fs";
 
-const keycloakPublicIssuer = process.env.KEYCLOAK_ISSUER;
-const keycloakInternalBaseUrl =
-  process.env.KEYCLOAK_INTERNAL_BASE_URL || keycloakPublicIssuer;
+function readSecretFromFile(filePath: string): string | undefined {
+  if (filePath) {
+    return fs.readFileSync(filePath as string, "utf8").trim();
+  }
+}
+
+const keycloakClientSecretValue = readSecretFromFile(
+  process.env.KEYCLOAK_CLIENT_SECRET_PATH as string
+);
 
 export const authOptions: NextAuthOptions = {
   providers: [
     KeycloakProvider({
-      clientId: process.env.KEYCLOAK_CLIENT_ID!,
-      clientSecret: process.env.KEYCLOAK_CLIENT_SECRET!,
-      issuer: keycloakPublicIssuer,
+      clientId: process.env.FRONTEND_CLIENT_ID!,
+      clientSecret: keycloakClientSecretValue!,
+      issuer: process.env.KEYCLOAK_ISSUER,
       wellKnown: undefined,
       token: {
-        url: `${keycloakInternalBaseUrl}/protocol/openid-connect/token`,
+        url: `${process.env.KEYCLOAK_FRONTEND_INTERNAL_URL}/protocol/openid-connect/token`,
       },
       userinfo: {
-        url: `${keycloakInternalBaseUrl}/protocol/openid-connect/userinfo`,
+        url: `${process.env.KEYCLOAK_FRONTEND_INTERNAL_URL}/protocol/openid-connect/userinfo`,
       },
-      jwks_endpoint: `${keycloakInternalBaseUrl}/protocol/openid-connect/certs`,
+      jwks_endpoint: `${process.env.KEYCLOAK_FRONTEND_INTERNAL_URL}/protocol/openid-connect/certs`,
       authorization: {
-        url: `${keycloakPublicIssuer}/protocol/openid-connect/auth`,
+        url: `${process.env.KEYCLOAK_ISSUER}/protocol/openid-connect/auth`,
         params: {
           scope: "openid email profile",
         },
@@ -43,7 +50,7 @@ export const authOptions: NextAuthOptions = {
             Buffer.from(account.access_token.split(".")[1], "base64").toString()
           );
 
-          const clientId = process.env.KEYCLOAK_CLIENT_ID;
+          const clientId = process.env.FRONTEND_CLIENT_ID;
           if (
             clientId &&
             decodedAccessToken.resource_access?.[clientId]?.roles

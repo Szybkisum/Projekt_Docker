@@ -1,59 +1,73 @@
 const express = require("express");
 const cors = require("cors");
-var { NodeAdapter } = require("ef-keycloak-connect");
+const { auth } = require("express-oauth2-jwt-bearer");
 
-const keycloakConfig = {
-  realm: process.env.KEYCLOAK_REALM_NAME,
-  "auth-server-url": process.env.KEYCLOAK_BACKEND_INTERNAL_URL,
-  "ssl-required": "external",
-  resource: process.env.KEYCLOAK_CLIENT_ID,
-  "verify-token-audience": true,
-  credentials: {
-    secret: process.env.KEYCLOAK_CLIENT_SECRET,
-  },
-  "confidential-port": 0,
-};
+const issuer = process.env.KEYCLOAK_ISSUER;
+const jwksUri = process.env.KEYCLOAK_INTERNAL_JWKS_URI;
+const audience = process.env.BACKEND_CLIENT_ID;
+const externalUrl = process.env.EXTERNAL_URL;
 
-const keycloak = new NodeAdapter(keycloakConfig);
+const checkJwt = auth({
+  audience: audience,
+  issuer: issuer,
+  jwksUri: jwksUri,
+  tokenSigningAlg: "RS256",
+});
 
 const app = express();
-app.use(cors({ origin: "https://localhost" }));
-app.use(keycloak.middleware({}));
+app.use(cors({ origin: externalUrl }));
+
+const PORT = process.env.PORT || 3001;
 
 app.get("/", (req, res) => {
-  res.json({ message: "Hello from public Express API!" });
+  res.json({ message: "Hello from PUBLIC Express API root!" });
 });
 
-app.get("/api/v1/protected", keycloak.protect(), (req, res) => {
-  const userInfo = req.kauth?.grant?.access_token?.content;
-  res.json({
-    message: "Hello from SECURED Express API!",
-    user: userInfo
-      ? {
-          id: userInfo.sub,
-          name: userInfo.name,
-          preferred_username: userInfo.preferred_username,
-          email: userInfo.email,
-          roles:
-            userInfo.resource_access?.[keycloakConfig.resource]?.roles ||
-            userInfo.realm_access?.roles ||
-            [],
-        }
-      : "Validated user (no specific user info extracted by default)",
-  });
-});
+app.get("/protected", checkJwt, (req, res) => {
+  const userInfo = req.auth.payload;
+  const userRoles = userInfo.resource_access?.frontend?.roles || [];
 
-app.get("/api/v1/admin-only", keycloak.protect("realm:admin"), (req, res) => {
-  const userInfo = req.kauth?.grant?.access_token?.content;
-  res.json({
-    message: "Hello Admin from SECURED Express API!",
-    user: userInfo?.name,
-    detail: "This endpoint is for admins only.",
-  });
+  if (userRoles.includes("admin")) {
+    res.json({
+      message: "Access GRANTED to SECURED Admin Express API!",
+      user: {
+        id: userInfo.sub,
+        name: userInfo.name,
+        preferred_username: userInfo.preferred_username,
+        email: userInfo.email,
+        roles: userRoles,
+      },
+    });
+  } else {
+    res.json({
+      message: "Access GRANTED to SECURED Express API!",
+      user: {
+        id: userInfo.sub,
+        name: userInfo.name,
+        preferred_username: userInfo.preferred_username,
+        email: userInfo.email,
+        roles: userRoles,
+      },
+    });
+  }
 });
 
 app.get("/health", (req, res) => {
   res.status(200).send("OK");
 });
 
-app.listen(3001, () => {});
+app.use((err, req, res, next) => {
+  if (err.name === "InvalidTokenError" || err.name === "UnauthorizedError") {
+    console.error("JWT Auth Error in Express:", err.message);
+    res
+      .status(err.status || 401)
+      .json({ error: "Unauthorized", message: err.message });
+  } else {
+    console.error("Unhandled Express Error:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Express API server (backend service) listening on port ${PORT}`);
+});
