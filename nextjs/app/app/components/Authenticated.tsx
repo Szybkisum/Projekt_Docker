@@ -31,7 +31,7 @@ export default function Authenticated({ user }: { user: User }) {
           action={fetchData}
           disabled={!!fetchState}
         />
-        <p>{fetchState === "fetching" ? <p>Loading...</p> : fetchState}</p>
+        <p>{fetchState === "fetching" ? "Loading..." : fetchState}</p>
       </div>
       {isAdmin && (
         <Link href={"/admin"}>

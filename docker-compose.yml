@@ -65,8 +65,7 @@ services:
     restart: unless-stopped
 
   backend:
-    build: ./backend
-    image: backend-image:latest
+    image: szybkisum/backend-image:latest
     container_name: backend
     ports:
       - "3001:3001"
@@ -99,8 +98,7 @@ services:
     restart: unless-stopped
 
   nextjs:
-    build: ./nextjs
-    image: nextjs-image:latest
+    image: szybkisum/nextjs-image:latest
     container_name: nextjs
     depends_on:
       keycloak:
@@ -132,8 +130,7 @@ services:
     restart: unless-stopped
 
   nginx:
-    build: ./nginx
-    image: nginx-image:latest
+    image: szybkisum/nginx-image:latest
     container_name: nginx
     ports:
       - "80:80"

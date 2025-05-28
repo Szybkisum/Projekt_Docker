@@ -5,10 +5,13 @@ RUN npm ci
 COPY ./app .
 RUN npm run build
 
-FROM node:18-alpine
+FROM node:18-alpine AS runner
 WORKDIR /app
+ENV NODE_ENV=production
 COPY --from=builder /app/package*.json ./
+RUN npm ci --omit=dev
 COPY --from=builder /app/.next ./.next
-RUN npm ci --production
+COPY --from=builder /app/tsconfig.json ./tsconfig.json
+
 EXPOSE 3000
-CMD ["npm", "start"]
+CMD ["node", "start"]
