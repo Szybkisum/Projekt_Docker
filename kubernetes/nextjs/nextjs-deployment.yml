@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nextjs-deployment
+  labels:
+    app: nextjs
+    project: technologie-chmurowe
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nextjs
+  template:
+    metadata:
+      labels:
+        app: nextjs
+        project: technologie-chmurowe
+    spec:
+      containers:
+        - name: nextjs
+          image: szybkisum/nextjs-image:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+              name: http-nextjs
+          envFrom:
+            - configMapRef:
+                name: nextjs-config
+          env:
+            - name: NEXTAUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: nextjs-secrets
+                  key: NEXTAUTH_SECRET
+            - name: KEYCLOAK_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: nextjs-secrets
+                  key: KEYCLOAK_CLIENT_SECRET
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http-nextjs
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http-nextjs
+            initialDelaySeconds: 45
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3

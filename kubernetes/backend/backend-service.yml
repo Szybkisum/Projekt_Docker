@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  labels:
+    app: backend
+    project: technologie-chmurowe
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3001
+      targetPort: http-backend
+      protocol: TCP
+  selector:
+    app: backend

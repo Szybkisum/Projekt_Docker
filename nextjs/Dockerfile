@@ -14,4 +14,4 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/tsconfig.json ./tsconfig.json
 
 EXPOSE 3000
-CMD ["node", "start"]
+CMD ["npm", "start"]

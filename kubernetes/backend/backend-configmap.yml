@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  labels:
+    app: backend
+    project: technologie-chmurowe
+data:
+  EXTERNAL_URL: https://localhost
+  REALM_NAME: myrealm
+  BACKEND_CLIENT_ID: backend
+  KEYCLOAK_INTERNAL_JWKS_URI: http://keycloak:8080/auth/realms/myrealm/protocol/openid-connect/certs
+  KEYCLOAK_ISSUER: https://localhost/auth/realms/myrealm

@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+    project: technologie-chmurowe
+spec:
+  type: LoadBalancer
+  ports:
+    - name: http
+      port: 80
+      targetPort: http-nginx
+      protocol: TCP
+    - name: https
+      port: 443
+      targetPort: https-nginx
+      protocol: TCP
+  selector:
+    app: nginx

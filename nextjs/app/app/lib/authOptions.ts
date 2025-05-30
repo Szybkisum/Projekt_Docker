@@ -9,9 +9,9 @@ function readSecretFromFile(filePath: string): string | undefined {
   }
 }
 
-const keycloakClientSecretValue = readSecretFromFile(
-  process.env.KEYCLOAK_CLIENT_SECRET_PATH as string
-);
+const keycloakClientSecretValue =
+  process.env.KEYCLOAK_CLIENT_SECRET ||
+  readSecretFromFile(process.env.KEYCLOAK_CLIENT_SECRET_PATH as string);
 
 export const authOptions: NextAuthOptions = {
   providers: [
