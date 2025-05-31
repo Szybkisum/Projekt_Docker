@@ -6,15 +6,15 @@ metadata:
     app: nginx
     project: technologie-chmurowe
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
     - name: http
       port: 80
       targetPort: http-nginx
       protocol: TCP
-    - name: https
-      port: 443
-      targetPort: https-nginx
+    - name: http-internal
+      port: 8080
+      targetPort: http-internal
       protocol: TCP
   selector:
     app: nginx

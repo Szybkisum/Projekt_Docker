@@ -6,7 +6,7 @@ metadata:
     app: nginx
     project: technologie-chmurowe
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: nginx
@@ -23,15 +23,12 @@ spec:
           ports:
             - containerPort: 80
               name: http-nginx
-            - containerPort: 443
-              name: https-nginx
+            - containerPort: 8080
+              name: http-internal
           volumeMounts:
             - name: nginx-config-volume
               mountPath: /etc/nginx/nginx.conf
               subPath: nginx.conf
-              readOnly: true
-            - name: nginx-ssl-volume
-              mountPath: /etc/nginx/ssl
               readOnly: true
           readinessProbe:
             httpGet:
@@ -52,6 +49,3 @@ spec:
             items:
               - key: nginx.conf
                 path: nginx.conf
-        - name: nginx-ssl-volume
-          secret:
-            secretName: nginx-secrets

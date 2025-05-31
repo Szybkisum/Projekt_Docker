@@ -6,7 +6,7 @@ metadata:
     app: backend
     project: technologie-chmurowe
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: backend

@@ -9,5 +9,5 @@ data:
   NEXTAUTH_URL: https://localhost
   FRONTEND_CLIENT_ID: frontend
   KEYCLOAK_ISSUER: https://localhost/auth/realms/myrealm
-  KEYCLOAK_FRONTEND_INTERNAL_URL: http://nginx:80/auth/realms/myrealm
+  KEYCLOAK_FRONTEND_INTERNAL_URL: http://nginx:8080/auth/realms/myrealm
   BACKEND_EXTERNAL_URL: http://backend:3001
