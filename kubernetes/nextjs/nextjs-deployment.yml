@@ -37,6 +37,13 @@ spec:
                 secretKeyRef:
                   name: nextjs-secrets
                   key: KEYCLOAK_CLIENT_SECRET
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
           readinessProbe:
             httpGet:
               path: /
