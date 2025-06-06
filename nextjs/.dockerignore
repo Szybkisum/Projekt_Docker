@@ -21,10 +21,6 @@ Thumbs.db
 *.swp
 *.swo
 
-.env
-.env.local
-.env.development
-.env.production
 .git
 .gitignore
 README.md

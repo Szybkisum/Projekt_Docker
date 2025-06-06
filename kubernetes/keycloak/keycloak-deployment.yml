@@ -22,6 +22,7 @@ spec:
           imagePullPolicy: IfNotPresent
           args:
             - start-dev
+            - --import-realm
           ports:
             - containerPort: 8080
               name: http
@@ -51,6 +52,11 @@ spec:
                 secretKeyRef:
                   name: keycloak-secrets
                   key: KC_DB_PASSWORD
+          volumeMounts:
+            - name: keycloak-init-volume
+              mountPath: /opt/keycloak/data/import/myrealm.json
+              subPath: myrealm.json
+              readOnly: true
           readinessProbe:
             httpGet:
               path: /auth/health/ready
@@ -67,3 +73,10 @@ spec:
             periodSeconds: 30
             timeoutSeconds: 10
             failureThreshold: 6
+      volumes:
+        - name: keycloak-init-volume
+          configMap:
+            name: keycloak-init-configmap
+            items:
+              - key: myrealm.json
+                path: myrealm.json
