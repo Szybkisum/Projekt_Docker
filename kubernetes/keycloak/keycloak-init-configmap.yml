@@ -809,7 +809,7 @@ data:
           "enabled": true,
           "alwaysDisplayInConsole": true,
           "clientAuthenticatorType": "client-secret",
-          "secret": "**********",
+          "secret": "KyRSETTTolVwjm7ura40BrARTX3HXg5u",
           "redirectUris": [
             "https://localhost/*"
           ],
@@ -910,7 +910,7 @@ data:
               {
                 "name": "Default Policy",
                 "description": "A policy that grants access only for users within this realm",
-                "type": "js",
+                "type": "regex",
                 "logic": "POSITIVE",
                 "decisionStrategy": "AFFIRMATIVE",
                 "config": {
